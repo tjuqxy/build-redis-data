@@ -44,22 +44,21 @@ read-command:
         srandmember:      #SRANDMEMBER key [count]
             - string
             - - int
-
-        #TODO 暂未添加
-        #sscan:           #SSCAN key cursor [MATCH pattern] [COUNT count]
-        #    - string
-        #    - int
-        #TODO 暂未添加
-        #sdiff:           #SDIFF key [key ...]
-        #    - string
-        #    - - string
-        #      - etc
-        #TODO 暂未添加
-        #sinter:          #SINTER key [key ...]
-        #    - string
-        #    - - string
-        #      - etc
-
+        sscan:            #SSCAN key cursor [MATCH pattern] [COUNT count]
+            - string
+            - int
+            - - MATCH
+              - match
+            - - COUNT
+              - int
+        sdiff:            #SDIFF key [key ...]
+            - string
+            - - string
+              - etc
+        sinter:           #SINTER key [key ...]
+            - string
+            - - string
+              - etc
         scard:            #SCARD key
             - string
         sismember:        #SISMEMBER key message
@@ -84,10 +83,13 @@ read-command:
             - string
             - - string
               - etc
-
-        #TODO 暂未添加
-        #hscan:           #HSCAN key cursor [MATCH pattern] [COUNT count]
-
+        hscan:            #HSCAN key cursor [MATCH pattern] [COUNT count]
+            - string
+            - int
+            - - MATCH
+              - match
+            - - COUNT
+              - int
         hvals:            #HVALS key
             - string
     zset:
@@ -143,10 +145,32 @@ read-command:
         zscore:           #ZSCORE key member
             - string
             - string
-
-        #TODO
-        #zunionstore
-        #zscan
+        zunionstore:      #ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]
+            #key的数量与weight的数量不同时会报错：ERR syntax error
+            - string
+            - numkeys
+            - string
+            - - string
+              - etc
+            - - WEIGHTS
+              - float
+              - - float
+                - etc
+            - - AGGREGATE
+              - aggrgate
+        zscan:            #ZSCAN key cursor [MATCH pattern] [COUNT count]
+            - string
+            - int
+            - - MATCH
+              - match
+            - - COUNT
+              - int
+    pf:
+        pfmerge:          #PFMERGE destkey sourcekey [sourcekey ...]
+            - string
+            - string
+            - - string
+              - etc
 
 #写命令
 write-command:
@@ -170,8 +194,20 @@ write-command:
         persist:          #PERSIST key
             - string
         sort:             #SORT key [BY pattern] [LIMIT offset count] [GET pattern [GET pattern ...]] [ASC|DESC] [ALPHA] [STORE destination]
-            #TODO 需要添加支持
             - string
+            - - BY
+              - match
+            - - LIMIT
+              - int
+              - int
+            - - GET
+              - string
+              - etc
+            - - sortModle
+            - - ALPHA
+            - - STORE
+              - string
+
     string:
         append:           #APPEND key value
             - string
@@ -342,12 +378,17 @@ write-command:
             - int
             - string
         zinterstore:      #ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]
-            #TODO 只实现了部分功能
             - string
-            - int
+            - numkeys
             - string
             - - string
               - etc
+            - - WEIGHTS
+              - float
+              - - float
+                - etc
+            - - AGGREGATE
+              - aggregate
         zrem:             #ZREM key member [member ...]
             - string
             - string

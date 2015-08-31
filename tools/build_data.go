@@ -6,11 +6,16 @@ import (
 )
 
 var (
+	//请求中传入了key
+	numKeys      = 0
+
+	//数据量配置
 	maxStrLen    = 40
 	maxIntVal    = 100
 	maxFloatVal  = 100
-	maxMultiTime = 20
+	maxMultiTime = 20     //批量个数
 
+	//记录start end情况下start的值
 	first        = true
 	firstInt     = -1
 	firstChar    = 0
@@ -115,6 +120,35 @@ func getData(name string) string {
 			"a\x03\x130.10\xe0\x05\x00\x031\x15\x01b@\x17\x002\xe0\x05\x16@\x17" +
 			"\x00c`\x17\x009\xe0\x06\x00\x02\x15\x01d@\x17\x004 #\xe0\x03\x00\x0b2" +
 			"\x15\x01e\x03\x030.5\x05\x01f@\x1f\x005\xe0\x066\x018\xff\x06\x006F_\xbe\xd0\xec*\x0b"
+	case "match":
+		length := RandInt(maxStrLen)
+		for length > 0 {
+			length--
+			switch RandInt(3) {
+			case 1:
+				result += string('a' + RandInt(26) - 1)
+			case 2:
+				result += "?"
+			case 3:
+				result += "*"
+			}
+		}
+	case "aggrgate":
+		switch RandInt(3) {
+		case 1:
+			result = "SUM"
+		case 2:
+			result = "MIN"
+		case 3:
+			result = "MAX"
+		}
+	case "sortModle":
+		switch RandInt(2) {
+		case 1:
+			result = "ASC"
+		case 2:
+			result = "DESC"
+		}
 	default:
 		fmt.Println("+++", name)
 		result = name
@@ -137,8 +171,16 @@ func BuildData(conf interface{}) string {
 					result += BuildData(param)
 				}
 			default:
-				if param.(string) == "etc" {
-					loop := RandInt(maxMultiTime)
+				if param.(string) == "numkeys" {
+					numKeys = RandInt(maxMultiTime)
+					result += strconv.Itoa(numKeys)
+				} else if param.(string) == "etc" {
+					loop := 0
+					if numKeys != 0 {
+						loop = numKeys //保证key的个数与后续传入相同
+					} else {
+						loop = RandInt(maxMultiTime)
+					}
 					for loop > 0 {
 						result += BuildData(paramList[:ind])
 						loop--
@@ -150,6 +192,10 @@ func BuildData(conf interface{}) string {
 		}
 	default:
 		fmt.Println("Unknown build data conf type:", confType)
+	}
+
+	if numKeys != 0 {
+		numKeys = 0
 	}
 
 	return result
